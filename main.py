@@ -13,7 +13,7 @@ headers = {'authorization': auth}
 # PlusGrade = false
 
 # Should output a CSV file. PowerBI/Python integration?
-# PCGS Number, name, price
+# PCGS Number, name, grade, price
 # API request requirements are manual inputs, everything else is automatic.
 
 def ok_click(event):
@@ -55,7 +55,8 @@ def output_csv(data: dict):
 
     # Output all required data from the current list of coins we have.
     # Not really sure how or where these are stored for right now. To be continued...
-    csv.write(data["PCGSNo"].__str__() + "," + data["Name"].__str__() + "," + data["PriceGuideValue"].__str__())
+    csv.write("PCGS #,Name,Grade,Est. Value\n")
+    csv.write(data["PCGSNo"].__str__() + "," + data["Name"].__str__() + "," + data["Grade"].__str__() + "," + data["PriceGuideValue"].__str__() + "\n")
 
     print("File written successfully.")
 
