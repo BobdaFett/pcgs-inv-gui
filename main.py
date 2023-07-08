@@ -1,8 +1,8 @@
 import requests
+import config
 from tkinter import *
 
-# The authorization key should be concealed somewhere. Not quite sure how to go about doing this.
-auth = "bearer QLtcuEs-j2rivJqYUHYO9vYa5vL_5nCNef9n3IGiE81o05UKBnBQkPuBiPHG-dTLPvpWz2Pn_cr54ZY2XNUnk2SCtFlRbWcHvsndHKaiTWJmdQaXRabo_Rhw9c4lUkr9ZuziXAWMwzNKUTR8r_3k2M6_E0d6UP9X7OrgA9xRhjkJucU9iVYGDPpQxi_QrNhEFxsw1Q2oF-isNujwN3UDhXTZEM1oZtfBMamH8vHPUbF6YUNFvlQYk5UcGo_Jxkw1KmjN2IOG_wkStbUgbXPLWH_PfW9zt6ZYce9A3aQfV-5DWmlV"
+auth = "bearer " + config.api_key
 api_url = "https://api.pcgs.com/publicapi/"
 
 headers = {'authorization': auth}
