@@ -1,6 +1,11 @@
+# Required for use with Qt
+from PySide6.QtWidgets import *
+from PySide6.QtGui import QIntValidator
+from PySide6.QtCore import QSize
+
+import sys
 import requests
 import config
-from tkinter import *
 
 auth = "bearer " + config.api_key
 api_url = "https://api.pcgs.com/publicapi/"
@@ -16,76 +21,103 @@ headers = {'authorization': auth}
 # PCGS Number, name, grade, price
 # API request requirements are manual inputs, everything else is automatic.
 
-def ok_click(event):
-    # Requests and saves the information from the API.
-    print("OK button was clicked")
-    pcgs = int(pcgs_input.get())
-    grade = int(grade_input.get())
-    plus = plus_grade.get()
+class Form(QDialog):
+    def __init__(self, parent=None):
+        super(Form, self).__init__(parent)
+        self.setWindowTitle("Testing")
+        self.pcgs_input = QLineEdit()
+        self.pcgs_input.setPlaceholderText("PCGS Number...")
+        self.grade_input = QLineEdit()
+        self.grade_input.setPlaceholderText("Grade Number...")
+        self.test_button = QPushButton("Add Coin...")
+        self.test_button.clicked.connect(self.ok_click)
 
-    # Use our utility function in order to send the request to the API.
-    response = request_facts_by_grade(pcgs, grade, plus)
+        self.new_button = QPushButton("New...")
+        self.edit_button = QPushButton("Edit...")
+        self.del_button = QPushButton("Delete")
+        self.export_button = QPushButton("Export to CSV")
 
-    # Save this information somewhere. Not sure where yet.
-    output_csv(response)
+        self.tree = QTreeWidget()
+        self.tree.setColumnCount(4)
+        self.tree.setHeaderLabels(["PCGS #", "Name", "Grade", "Est. Value"])
 
+        validator = QIntValidator()
+        self.pcgs_input.setValidator(validator)
+        self.grade_input.setValidator(validator)
 
-def csv_click(event):
-    # This should open a new window to choose a path for a file with .csv file extension.
-    # This is very much a later issue.
-    print("Import CSV was clicked")
+        layout = QGridLayout()
+        layout.addWidget(self.tree, 0, 0, 1, 5)
+        layout.addWidget(self.new_button, 1, 0)
+        layout.addWidget(self.edit_button, 1, 1)
+        layout.addWidget(self.del_button, 1, 2)
+        layout.addWidget(self.export_button, 1, 4)
 
+        self.setMinimumSize(QSize(450, 250))
 
-def request_facts_by_grade(pcgs: int, grade: int, plus_grade: bool):
-    # Build the request url.
-    request_url = api_url + "coindetail/GetCoinFactsByGrade?PCGSNo=" + pcgs.__str__() + "&GradeNo=" + grade.__str__() + "&PlusGrade=" + plus_grade.__str__()
-    print("Sending request for coin facts for coin number " + pcgs.__str__() + "...")
+        self.setLayout(layout)
     
-    # Send the request to the server and wait for a response.
-    response = requests.get(request_url, headers=headers)
-    print("Response received.")
+    def hi(self):
+        print("Hello world!")
 
-    # Add a check here to ensure there are no errors. This will most likely become its own function.
-    return response.json()
+    def ok_click(self):
+        # Requests and saves the information from the API.
+        pcgs = int(self.pcgs_input.text())
+        grade = int(self.grade_input.text())
 
+        # Use our utility function in order to send the request to the API.
+        response = self.request_facts_by_grade(pcgs, grade)
 
-def output_csv(data: dict):
-    # Creates a CSV file and overwrites any that were previously created.
-    csv = open("csvTest.csv", "w")
-
-    # Output all required data from the current list of coins we have.
-    # Not really sure how or where these are stored for right now. To be continued...
-    csv.write("PCGS #,Name,Grade,Est. Value\n")
-    csv.write(data["PCGSNo"].__str__() + "," + data["Name"].__str__() + "," + data["Grade"].__str__() + "," + data["PriceGuideValue"].__str__() + "\n")
-
-    print("File written successfully.")
+        # Save this information somewhere. Not sure where yet.
+        self.output_csv(response)
 
 
-# Create the window. We want these to be public (even though it makes me cringe)
-# TODO Move this into a class. This shouldn't be attached to the file here.
+    def request_facts_by_grade(self, pcgs: int, grade: int):
+        # Build the request url.
+        request_url = api_url + "coindetail/GetCoinFactsByGrade?PCGSNo=" + pcgs.__str__() + "&GradeNo=" + grade.__str__() + "&PlusGrade=false"
+        print("Sending request for coin facts for coin number " + pcgs.__str__() + "...")
+        
+        # Send the request to the server and wait for a response.
+        response = requests.get(request_url, headers=headers)
+        print("Response received.")
 
-window = Tk()
-window.title("Coin Search")
+        # Add a check here to ensure there are no errors. This will most likely become its own function.
+        return response.json()
 
-plus_grade = BooleanVar()
+    def output_csv(self, data: dict):
+        # Creates a CSV file and overwrites any that were previously created.
+        csv = open("csvTest.csv", "w")
+        print("Writing file...")
 
-pcgs_input = Entry()
-grade_input = Entry()
-plus_input = Checkbutton(offvalue=False, onvalue=True, variable=plus_grade)
+        # Output all required data from the current list of coins we have.
+        # Not really sure how or where these are stored for right now. To be continued...
+        csv.write("PCGS #,Name,Grade,Est. Value\n")
+        csv.write(data["PCGSNo"].__str__() + "," + data["Name"].__str__() + "," + data["Grade"].__str__() + "," + data["PriceGuideValue"].__str__() + "\n")
 
-pcgs_label = Label(text="PCGS Number:", padx=15)
-grade_label = Label(text="Coin Grade:", padx=15)
-plus_label = Label(text="Plus Grade:", padx=15)
+        Modal(parent=self, text="File written successfully.", title="Success")
 
-ok_button = Button(text="OK", padx=5, pady=5)
-ok_button.bind("<Button-1>", ok_click)
+class Modal(QDialog):
+    def __init__(self, parent=None, text="", title="Alert"):
+        super(Modal, self).__init__(parent)
+        self.setWindowTitle(title)
+        self.label = QLabel(text)
+        self.button = QPushButton("OK")
+        self.button.clicked.connect(self.button_clicked)
 
-pcgs_input.grid(row=0, column=1, pady=5)
-grade_input.grid(row=1, column=1, pady=5)
-plus_input.grid(row=2, column=1, pady=5)
-pcgs_label.grid(row=0, column=0, pady=5)
-grade_label.grid(row=1, column=0, pady=5)
-plus_label.grid(row=2, column=0, pady=5)
-ok_button.grid(row=3, columnspan=2, column=0, pady=10)
+        layout = QVBoxLayout()
+        layout.addWidget(self.label)
+        layout.addWidget(self.button)
 
-window.mainloop()
+        self.setLayout(layout)
+        self.exec()
+
+    def button_clicked(self):
+        self.close()
+
+
+if __name__ == "__main__":
+    app = QApplication()
+
+    form = Form()
+    form.show()
+
+    sys.exit(app.exec())
