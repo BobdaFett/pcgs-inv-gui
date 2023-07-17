@@ -1,6 +1,5 @@
 from PySide6.QtWidgets import QApplication
-from utils import *
-from windows import *
+from windows import Form
 
 import sys
 
