@@ -1,17 +1,25 @@
-from PySide6.QtWidgets import QApplication, QDialog, QLineEdit, QPushButton, QTreeWidget, QTreeWidgetItem, QGridLayout
+from PySide6.QtWidgets import QApplication, QDialog, QLineEdit, QPushButton, QTreeWidget, QTreeWidgetItem, QGridLayout, QLabel
 from PySide6.QtCore import QSize
-from api_utils import request_facts_by_grade
+from api_utils import *
+
+import json
+import config
 
 class Form(QDialog):
     def __init__(self, parent=None):
         super(Form, self).__init__(parent)
         self.setWindowTitle("Testing")
 
+        self.client = PCGSClient(config.PCGS_CERT)
+        self.collection = CoinCollection()
+
         self.new_button = QPushButton("New...")
         self.edit_button = QPushButton("Edit...")
         self.del_button = QPushButton("Delete")
         self.export_button = QPushButton("Export to CSV")
-        
+        self.total = 0
+        self.total_label = QLabel("Total = $" + self.total.__str__())
+
         self.new_button.clicked.connect(self.new_click)
         self.edit_button.clicked.connect(self.edit_click)
         self.del_button.clicked.connect(self.del_click)
@@ -19,13 +27,14 @@ class Form(QDialog):
 
         self.tree = QTreeWidget()
         self.tree.setColumnCount(4)
-        self.tree.setHeaderLabels(["PCGS #", "Name", "Grade", "Est. Value"])
+        self.tree.setHeaderLabels(["Series", "Year", "Mint", "Denomination", "Variety", "Grade", "Designation", "Est. Price", "PCGS #"])
 
         layout = QGridLayout()
         layout.addWidget(self.tree, 0, 0, 1, 5)
         layout.addWidget(self.new_button, 1, 0)
         layout.addWidget(self.edit_button, 1, 1)
         layout.addWidget(self.del_button, 1, 2)
+        layout.addWidget(self.total_label, 1, 3)
         layout.addWidget(self.export_button, 1, 4)
 
         self.setMinimumSize(QSize(450, 250))
@@ -42,14 +51,12 @@ class Form(QDialog):
             print("User accepted dialog, making request.")
             pcgs = int(window.pcgs_input.text())
             grade = int(window.grade_input.text())
-            coin_facts = request_facts_by_grade(pcgs, grade)
-            print("Coin name: {0}".format(coin_facts['Name']))
-            # This must now add the coin into the form's QTreeWidget. This may eventually be changed into an object.
-            new_coin = QTreeWidgetItem(self.tree)
-            new_coin.setText(0, coin_facts['PCGSNo'])
-            new_coin.setText(1, coin_facts['Name'])
-            new_coin.setText(2, coin_facts['Grade'])
-            new_coin.setText(3, coin_facts['PriceGuideValue'].__str__())
+            coin_facts = self.client.request_facts_by_grade(pcgs, grade)
+            new_coin = Coin(coin_facts)
+            self.collection.add_coin(new_coin)
+            new_coin.to_widget(self.tree)
+            self.total += new_coin.price
+            self.total_label.setText("Total = $" + self.total.__str__())
 
     def edit_click(self):
         ''' Displays a window allowing the user to enter new information for the selected coin. '''
@@ -68,13 +75,14 @@ class Form(QDialog):
         ''' Will show a window that allows the user to export a CSV file to their PC, OneDrive, or Google Drive (when I can get them working) '''
         print("Export clicked")
 
+
 class RequestWindow(QDialog):
     ''' A window that follows the general form for a PCGS API request.
         NOTE: You must use the QDialog.exec() method to show this in order for the QDialog.result() method to work. '''
     def __init__(self, window_title: str, parent=None):
         super(RequestWindow, self).__init__(parent)
         self.setWindowTitle(window_title)
-        
+
         self.pcgs_input = QLineEdit()
         self.grade_input = QLineEdit()
         self.ok_button = QPushButton("OK")
@@ -94,11 +102,15 @@ class RequestWindow(QDialog):
 
         self.setLayout(layout)
 
+
 if __name__ == "__main__":
     app = QApplication()
 
     form = Form()
     form.show()
+
+    with open("file.txt", "w") as file:
+        file.write("Hello")
 
     import sys
     sys.exit(app.exec())
