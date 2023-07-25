@@ -1,13 +1,11 @@
 from PySide6.QtWidgets import QApplication
-from windows import Form
+from windows.MainWindow import Form
 
 import sys
 
+app = QApplication()
 
-if __name__ == "__main__":
-    app = QApplication()
+form = Form()
+form.show()
 
-    form = Form()
-    form.show()
-
-    sys.exit(app.exec())
+sys.exit(app.exec())
