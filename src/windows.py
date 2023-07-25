@@ -1,6 +1,9 @@
-from PySide6.QtWidgets import QApplication, QDialog, QLineEdit, QPushButton, QTreeWidget, QTreeWidgetItem, QGridLayout, QLabel, QFileDialog, QVBoxLayout
+from PySide6.QtWidgets import QApplication, QDialog, QLineEdit, QPushButton, QTreeWidget, QTreeWidgetItem, QGridLayout, QLabel, QFileDialog, QHBoxLayout
 from PySide6.QtCore import QSize
-from api_utils import *
+from PySide6.QtGui import QIntValidator, QDesktopServices
+from obj.Coin import *
+from obj.CoinCollection import *
+from obj.PCGSClient import *
 
 import config
 
@@ -25,9 +28,10 @@ class Form(QDialog):
         self.export_button.clicked.connect(self.export_click)
 
         self.tree = QTreeWidget()
-        self.tree.setHeaderLabels(["Series", "Year", "Mint", "Denomination", "Variety", "Grade", "Designation", "Est. Price", "PCGS #"])
+        self.tree.setHeaderLabels(["Series", "Year", "Mint", "Denomination", "Variety", "Grade", "Designation", "Est. Price", "PCGS #", "Quantity"])
         self.tree.setColumnWidth(0, 300)
         self.tree.setColumnWidth(4, 175)
+        self.tree.setColumnWidth(8, 75)
         self.tree.setSelectionMode(QTreeWidget.SelectionMode.SingleSelection)
         self.tree.setSortingEnabled(True)
 
@@ -39,7 +43,7 @@ class Form(QDialog):
         layout.addWidget(self.total_label, 1, 3)
         layout.addWidget(self.export_button, 1, 4)
 
-        self.setMinimumSize(QSize(1200, 250))
+        self.setMinimumSize(QSize(1250, 250))
 
         self.setLayout(layout)
 
@@ -72,11 +76,15 @@ class Form(QDialog):
         window.exec()
         # Reinitialize the selected object. Simply take the (possibly) new values and change the QTreeWidgetItem.
         # This will run every time because it's fast.
-        print("Updating coin...")
+        sel_coin.price = int(window.price.text())
+        sel_coin.quantity = int(window.quantity.text())
+        sel_coin.paid_for = int(window.paid_for.text())
+        sel_item.setText(7, "${0}".format(window.price.text()))
+        sel_item.setText(9, window.quantity.text())
 
     def del_click(self):
         ''' Asks for confirmation that the user will delete a coin, then acts on that info. '''
-        print("Delete clicked")
+        
 
     def export_click(self):
         ''' Will show a window that allows the user to export a CSV file to their PC. '''
@@ -87,8 +95,7 @@ class Form(QDialog):
                 file.write("Series,Year,Mint,Denomination,Variety,Grade,Designation,Est. Price,PCGS #\n")
                 # Write the contents of every coin in the collection.
                 for coin in self.collection:
-                    file.write("{0},{1},{2},{3},{4},{5},{6},{7}\n".format(coin.series_name, coin.year, coin.mint_mark, coin.denomination, coin.maj_var,
-                                                                          coin.grade, coin.designation, coin.price, coin.pcgs_no))
+                    file.write(coin.serialize_csv())
                 # Print the total. This should be specific to the CSV file.
                 file.write(",,,,,,Total,{0},".format(self.total))
             print("File successfully saved at \"{0}\"".format(file_path))
@@ -123,6 +130,9 @@ class RequestWindow(QDialog):
         layout.addWidget(self.ok_button, 2, 0)
         layout.addWidget(self.cancel_button, 2, 1)
 
+        validator = QIntValidator()
+        self.pcgs_input.setValidator(validator)
+
         self.setLayout(layout)
 
 
@@ -140,15 +150,18 @@ class EditWindow(QDialog):
         self.headers = [
             QLabel("PCGS Number:"),
             QLabel("Year:"),
-            QLabel("Denomination:"),
             QLabel("Mint Mark:"),
+            QLabel("Denomination:"),
             QLabel("Grade:"),
             QLabel("Est. Price:"),
             QLabel("Major Variety:"),
             QLabel("Minor Variety:"),
             QLabel("Die Variety:"),
+            QLabel("Series:"),
             QLabel("Category:"),
-            QLabel("Designation:")
+            QLabel("Designation:"),
+            QLabel("Quantity:"),
+            QLabel("Paid For:")
         ]
 
         ''' Labels that store the information of the currently displayed coin. 
@@ -165,32 +178,60 @@ class EditWindow(QDialog):
         self.series         = QLabel(display.series_name)
         self.category       = QLabel(display.category)
         self.designation    = QLabel(display.designation)
+        self.quantity       = QLineEdit()
+        self.paid_for       = QLineEdit()
         self.fact_link      = QPushButton(text="PCGS Website")
         
-        self.price.setText(display.price)
+        self.price.setText(display.price.__str__())
+        self.quantity.setText(display.quantity.__str__())
+        self.paid_for.setText(display.paid_for.__str__())
 
+        self.fact_link.clicked.connect(self.link_clicked)
+
+        ''' Create small layout structures for the price and "paid for" inputs. '''
+        price_layout = QHBoxLayout()
+        price_layout.addWidget(QLabel("$"))
+        price_layout.addWidget(self.price)
+
+        paid_layout = QHBoxLayout()
+        paid_layout.addWidget(QLabel("$"))
+        paid_layout.addWidget(self.paid_for)
+
+        ''' Add all the widgets to the layout for the window. '''
         layout = QGridLayout()
-        # Add the "header" labels.
         for (i, label) in enumerate(self.headers):
             layout.addWidget(label, i, 0)
-        # Add the info labels.
         layout.addWidget(self.pcgs_no, 0, 1)
         layout.addWidget(self.year, 1, 1)
-        layout.addWidget(self.denomination, 2, 1)
-        layout.addWidget(self.mint_mark, 3, 1)
+        layout.addWidget(self.mint_mark, 2, 1)
+        layout.addWidget(self.denomination, 3, 1)
         layout.addWidget(self.grade, 4, 1)
-        layout.addWidget(self.price, 5, 1)
+        layout.addLayout(price_layout, 5, 1)
         layout.addWidget(self.maj_var, 6, 1)
         layout.addWidget(self.min_var, 7, 1)
         layout.addWidget(self.die_var, 8, 1)
         layout.addWidget(self.series, 9, 1)
         layout.addWidget(self.category, 10, 1)
         layout.addWidget(self.designation, 11, 1)
-        layout.addWidget(self.fact_link, 12, 0, 1, 2)
+        layout.addWidget(self.quantity, 12, 1)
+        layout.addLayout(paid_layout, 13, 1)
+        layout.addWidget(self.fact_link, 14, 0, 1, 2)
 
-        layout.setColumnMinimumWidth(0, 100)
+        ''' Enable text validation for the corresponding input boxes. '''
+        validator = QIntValidator()
+        self.price.setValidator(validator)
+        self.quantity.setValidator(validator)
+        self.paid_for.setValidator(validator)
+
+        layout.setColumnMinimumWidth(0, 150)
 
         self.setLayout(layout)
+
+        self.setMinimumWidth(300)
+
+    def link_clicked(self):
+        ''' Utility function to handle clicking on the website button. '''
+        QDesktopServices.openUrl(self.selected_coin.fact_link)
 
 
 if __name__ == "__main__":
