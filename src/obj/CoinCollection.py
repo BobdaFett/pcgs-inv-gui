@@ -41,7 +41,7 @@ class CoinCollection:
         try:
             if working_directory == "":
                 working_directory = os.path.realpath(".")
-            with open(working_directory + "\\config\\" + file_name, "r") as file:
+            with open(working_directory + "\\src\\config\\" + file_name, "r") as file:
                 # Read the file.
                 json_obj = json.load(file)
                 for coin_dict in json_obj['collection'].values():
@@ -55,7 +55,7 @@ class CoinCollection:
         ''' Creates a file that can be used in the read_file() method. '''
         if working_directory == "":
             working_directory = os.path.realpath(".")
-        with open(working_directory + "\\config\\" + file_name, "w") as file:
+        with open(working_directory + "\\src\\config\\" + file_name, "w") as file:
             file.write(self.toJson())
 
     def dump_csv(self, file_path="collection.csv"):

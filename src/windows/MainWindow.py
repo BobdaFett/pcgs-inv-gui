@@ -5,7 +5,7 @@ if __name__ == "__main__":
 
 from PySide6.QtWidgets import QDialog, QPushButton, QTreeWidget, QGridLayout, QLabel, QFileDialog
 from PySide6.QtCore import QSize
-from dotenv import dotenv_values
+from dotenv import load_dotenv
 from obj.Coin import Coin
 from obj.CoinCollection import CoinCollection
 from obj.PCGSClient import PCGSClient
@@ -13,14 +13,17 @@ from .DeleteWindow import DeleteWindow
 from .RequestWindow import RequestWindow
 from .EditWindow import EditWindow
 
-config = dotenv_values()
+import os
+
+load_dotenv()
+PCGS_CERT = os.getenv("PCGS_CERT")
 
 class Form(QDialog):
     def __init__(self, parent=None):
         super(Form, self).__init__(parent)
         self.setWindowTitle("Testing")
 
-        self.client = PCGSClient(config['PCGS_CERT'])
+        self.client = PCGSClient(PCGS_CERT)
         self.collection = CoinCollection()
 
         self.new_button = QPushButton("New...")
