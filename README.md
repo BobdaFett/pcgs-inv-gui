@@ -12,7 +12,7 @@ Google. Therefore, it is not possible, however you're welcome to use your own PC
 # Installation/Setup
 For the first time setup, run the command ```setup.py install``` from inside the pcgs-inv-gui folder. I've never set this sort of thing up before, so if it doesn't work let me know.
 The program should be run from the ```main.py``` file in the ```src``` folder. This will check for your PCGS Public API key. If you do not have one, please go to https://api.pcgs.com/publicapi and sign up for one. The file will allow you to open a webpage directed there as well.
-Should you want to set up the file yourself, rather than have the program do it for you, create a file in the directory and name it "```.env```". You will then need to make a field named ```"PCGS_CERT"``` on the first line, followed by ```" = "your key here""```. Eventually it'll look something like ```"PCGS_CERT = ha;dlfng;ah;lkjd"``` (your key will be much longer)
+Should you want to set up the file yourself, rather than have the program do it for you, you must create a ```.env``` file that has a ```"PCGS_CERT"``` variable. There's plenty of documentation on how to do this out on the internet, so I won't explain that here.
 
 # Running the program
 As mentioned before, everything operates out of ```main.py```. It will display a window on your screen, and the rest is pretty intuitive.
