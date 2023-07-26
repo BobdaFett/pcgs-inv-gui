@@ -3,6 +3,3 @@ config.py
 *.txt
 *.json
 .env
-/.idea/
-/.vscode/
-/pcgs_inv_gui.egg-info/
