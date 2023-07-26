@@ -1,3 +1,8 @@
+if __name__ == "__main__":
+    import sys
+    print("Please run the program from the main.py file.")
+    sys.exit()
+
 from PySide6.QtWidgets import QDialog, QLineEdit, QPushButton, QGridLayout
 from PySide6.QtGui import QIntValidator
 

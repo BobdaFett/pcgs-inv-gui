@@ -1,3 +1,5 @@
 *.csv
 config.py
 *.txt
+*.json
+.env

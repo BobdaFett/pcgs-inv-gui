@@ -1,11 +1,16 @@
-from PySide6.QtWidgets import QDialog, QLineEdit, QPushButton, QGridLayout, QLabel, QHBoxLayout
+if __name__ == "__main__":
+    import sys
+    print("Please run the program from the main.py file.")
+    sys.exit()
+
+from PySide6.QtWidgets import QDialog, QLineEdit, QPushButton, QGridLayout, QLabel, QHBoxLayout, QVBoxLayout, QTextEdit
 from PySide6.QtGui import QIntValidator, QDesktopServices
 from obj.Coin import Coin
 
 class EditWindow(QDialog):
     def __init__(self, display: Coin, parent=None):
         super(EditWindow, self).__init__(parent)
-        self.setWindowTitle("Editing {0}".format(display.name))
+        self.setWindowTitle("Editing {0}".format(display.Name))
         self.selected_coin = display
         
         ''' Should show all of the coin's optional information.
@@ -32,27 +37,30 @@ class EditWindow(QDialog):
 
         ''' Labels that store the information of the currently displayed coin. 
             This makes visual organization and formatting much easier. '''
-        self.pcgs_no        = QLabel(display.pcgs_no.__str__())
-        self.year           = QLabel(display.year.__str__())
-        self.denomination   = QLabel(display.denomination)
-        self.mint_mark      = QLabel(display.mint_mark)
-        self.grade          = QLabel(display.grade)
+        self.pcgs_no        = QLabel(display.PCGSNo.__str__())
+        self.year           = QLabel(display.Year.__str__())
+        self.denomination   = QLabel(display.Denomination)
+        self.mint_mark      = QLabel(display.MintMark)
+        self.grade          = QLabel(display.Grade)
         self.price          = QLineEdit()
-        self.maj_var        = QLabel(display.maj_var)
-        self.min_var        = QLabel(display.min_var)
-        self.die_var        = QLabel(display.die_var)
-        self.series         = QLabel(display.series_name)
-        self.category       = QLabel(display.category)
-        self.designation    = QLabel(display.designation)
+        self.maj_var        = QLabel(display.MajorVariety)
+        self.min_var        = QLabel(display.MinorVariety)
+        self.die_var        = QLabel(display.DieVariety)
+        self.series         = QLabel(display.SeriesName)
+        self.category       = QLabel(display.Category)
+        self.designation    = QLabel(display.Designation)
         self.quantity       = QLineEdit()
         self.paid_for       = QLineEdit()
         self.fact_link      = QPushButton(text="PCGS Website")
+        self.close_button   = QPushButton(text="Close")
+        self.notes          = QTextEdit()
         
-        self.price.setText(display.price.__str__())
-        self.quantity.setText(display.quantity.__str__())
+        self.price.setText(display.PriceGuideValue.__str__())
+        self.quantity.setText(display.Quantity.__str__())
         self.paid_for.setText(display.paid_for.__str__())
 
         self.fact_link.clicked.connect(self.link_clicked)
+        self.close_button.clicked.connect(self.close)
 
         ''' Create small layout structures for the price and "paid for" inputs. '''
         price_layout = QHBoxLayout()
@@ -62,6 +70,10 @@ class EditWindow(QDialog):
         paid_layout = QHBoxLayout()
         paid_layout.addWidget(QLabel("$"))
         paid_layout.addWidget(self.paid_for)
+
+        notes_layout = QVBoxLayout()
+        notes_layout.addWidget(QLabel("Notes:"))
+        notes_layout.addWidget(self.notes)
 
         ''' Add all the widgets to the layout for the window. '''
         layout = QGridLayout()
@@ -82,6 +94,8 @@ class EditWindow(QDialog):
         layout.addWidget(self.quantity, 12, 1)
         layout.addLayout(paid_layout, 13, 1)
         layout.addWidget(self.fact_link, 14, 0, 1, 2)
+        layout.addWidget(self.close_button, 14, 2)
+        layout.addLayout(notes_layout, 0, 2, layout.rowCount() - 1, 1)
 
         ''' Enable text validation for the corresponding input boxes. '''
         validator = QIntValidator()
@@ -97,4 +111,4 @@ class EditWindow(QDialog):
 
     def link_clicked(self):
         ''' Utility function to handle clicking on the website button. '''
-        QDesktopServices.openUrl(self.selected_coin.fact_link)
+        QDesktopServices.openUrl(self.selected_coin.CoinFactsLink)

@@ -1,3 +1,8 @@
+if __name__ == "__main__":
+    import sys
+    print("Please run the program from the main.py file.")
+    sys.exit()
+    
 from PySide6.QtWidgets import QDialog, QPushButton, QLabel, QGridLayout
 
 class DeleteWindow(QDialog):
@@ -16,4 +21,3 @@ class DeleteWindow(QDialog):
         layout.addWidget(self.cancel_button, 1, 1)
 
         self.setLayout(layout)
-        

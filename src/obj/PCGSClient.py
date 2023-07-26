@@ -2,7 +2,7 @@ import requests
 
 class PCGSClient:
     ''' A client that handles all PCGS Public API requests. '''
-    def __init__(self, api_key: str):
+    def __init__(self, api_key):
         self.API_URL = "https://api.pcgs.com/publicapi"
         self.API_KEY = api_key
         # TODO Find out if there's a way to test the api before using it. Allows raising errors.

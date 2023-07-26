@@ -1,5 +1,11 @@
+if __name__ == "__main__":
+    import sys
+    print("Please run the program from the main.py file.")
+    sys.exit()
+
 from PySide6.QtWidgets import QDialog, QPushButton, QTreeWidget, QGridLayout, QLabel, QFileDialog
 from PySide6.QtCore import QSize
+from dotenv import dotenv_values
 from obj.Coin import Coin
 from obj.CoinCollection import CoinCollection
 from obj.PCGSClient import PCGSClient
@@ -7,14 +13,14 @@ from .DeleteWindow import DeleteWindow
 from .RequestWindow import RequestWindow
 from .EditWindow import EditWindow
 
-import config
+config = dotenv_values()
 
 class Form(QDialog):
     def __init__(self, parent=None):
         super(Form, self).__init__(parent)
         self.setWindowTitle("Testing")
 
-        self.client = PCGSClient(config.PCGS_CERT)
+        self.client = PCGSClient(config['PCGS_CERT'])
         self.collection = CoinCollection()
 
         self.new_button = QPushButton("New...")
@@ -34,8 +40,14 @@ class Form(QDialog):
         self.tree.setColumnWidth(0, 300)
         self.tree.setColumnWidth(4, 175)
         self.tree.setColumnWidth(8, 75)
+        self.tree.setColumnWidth(9, 75)
         self.tree.setSelectionMode(QTreeWidget.SelectionMode.SingleSelection)
         self.tree.setSortingEnabled(True)
+
+        if self.collection.read_save_file():
+            # Initialize the QTreeWidget list.
+            for coin in self.collection:
+                coin.to_widget(self.tree)
 
         layout = QGridLayout()
         layout.addWidget(self.tree, 0, 0, 1, 5)
@@ -45,9 +57,13 @@ class Form(QDialog):
         layout.addWidget(self.total_label, 1, 3)
         layout.addWidget(self.export_button, 1, 4)
 
-        self.setMinimumSize(QSize(1250, 250))
+        self.setMinimumSize(QSize(1250, 500))
 
         self.setLayout(layout)
+
+    def __del__(self):
+        # Allow normal deletion, with the addition of a save pass.
+        self.collection.dump_json()
 
     def new_click(self):
         ''' Displays a modal window that requests the required info for a PCGS request. '''
@@ -64,7 +80,7 @@ class Form(QDialog):
                 new_coin = Coin(coin_facts)
                 self.collection.add_coin(new_coin)
                 new_coin.to_widget(self.tree)
-                self.total += new_coin.price
+                self.total += new_coin.PriceGuideValue
                 self.total_label.setText("Total Value = $" + self.total.__str__())
             except KeyError:
                 # TODO Make a nice error window for this, which will allow the user to try again.
@@ -78,9 +94,10 @@ class Form(QDialog):
         window.exec()
         # Reinitialize the selected object. Simply take the (possibly) new values and change the QTreeWidgetItem.
         # This will run every time.
-        sel_coin.price = int(window.price.text())
-        sel_coin.quantity = int(window.quantity.text())
+        sel_coin.PriceGuideValue = float(window.price.text())
+        sel_coin.Quantity = int(window.quantity.text())
         sel_coin.paid_for = int(window.paid_for.text())
+        sel_coin.notes = window.notes.toPlainText()
         sel_item.setText(7, "${0}".format(window.price.text()))
         sel_item.setText(9, window.quantity.text())
 
@@ -88,7 +105,7 @@ class Form(QDialog):
         ''' Asks for confirmation that the user will delete a coin, then acts on that info. '''
         sel_item = self.tree.selectedItems()[0]
         sel_coin = self.collection[sel_item.text(8)]
-        window = DeleteWindow(sel_coin.name, self)
+        window = DeleteWindow(sel_coin.Name, self)
         window.exec()
         if window.result() == 1:
             print("User accepted the verification request, deleting coin.")
@@ -98,7 +115,7 @@ class Form(QDialog):
             # Update the tree.
             self.tree.invisibleRootItem().removeChild(sel_item)
             # Delete the item from the collection.
-            del self.collection[sel_coin.pcgs_no]
+            del self.collection[sel_coin.PCGSNo]
         else:
             print("User denied the verification request.")
 
