@@ -51,10 +51,13 @@ class CoinCollection:
             print("Save file does not exist. Continuing without any saved data... ")
             return False
 
-    def dump_json(self, working_directory="", file_name="collection.json"):
+    def create_save_file(self, working_directory="", file_name="collection.json"):
         ''' Creates a file that can be used in the read_file() method. '''
         if working_directory == "":
             working_directory = os.path.realpath(".")
+        path = working_directory + "\\src\\config\\"
+        if os.path.exists(path) is False:
+            os.mkdir(path)
         with open(working_directory + "\\src\\config\\" + file_name, "w") as file:
             file.write(self.toJson())
 

@@ -66,7 +66,7 @@ class Form(QDialog):
 
     def __del__(self):
         # Allow normal deletion, with the addition of a save pass.
-        self.collection.dump_json()
+        self.collection.create_save_file()
 
     def new_click(self):
         ''' Displays a modal window that requests the required info for a PCGS request. '''

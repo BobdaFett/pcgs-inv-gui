@@ -16,6 +16,7 @@ Should you want to set up the file yourself, rather than have the program do it 
 
 # Running the program
 As mentioned before, everything operates out of ```main.py```. It will display a window on your screen, and the rest is pretty intuitive.
+As of right now, all saved files from the program (besides the optional CSV file) are saved to the ```src/config/``` folder. Edit these at your own risk.
 
 # Bugs
 Should you find a bug, please report it in the "Issues" tab of the GitHub. I'll get to it eventually, and clearly mark if I'm no longer working on this specific project.
