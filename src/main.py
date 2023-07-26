@@ -15,7 +15,10 @@ except KeyError:
     if open_browser.lower() == "y":
         webbrowser.open("https://www.pcgs.com/publicapi/", 0)
     api_key_input = input("After logging in, your API key can be found by clicking the link inside the \"Documentation\" area on the right.\nPlease paste your API key here: ")
-    with open("src/config/.env", "w") as file:
+    path = os.path.realpath(".") + "\\src\\config\\"
+    if os.path.exists(path) is False:
+            os.mkdir(path)
+    with open(path + ".env", "w") as file:
         file.write("PCGS_CERT = \'" + api_key_input + "\'")
 
 from windows.MainWindow import Form
