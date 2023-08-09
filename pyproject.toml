@@ -1,0 +1,18 @@
+[build-system]
+requires = ['setuptools']
+
+[project]
+name = "PCGS-Inv-GUI"
+authors = [
+    { name = "Lucas Vas", email = "lvas463@gmail.com" },
+    { name = "Ian Raistrick" }
+]
+description = ""
+readme = "README.md"
+requires-python = ">=3.7"
+dependencies = [
+    'requests',
+    'python-dotenv',
+    'PySide6'
+]
+version = "1.0a"

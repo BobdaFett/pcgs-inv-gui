@@ -80,6 +80,7 @@ class Form(QDialog):
                 pcgs = int(window.pcgs_input.text())
                 grade = int(window.grade_input.text())
                 coin_facts = self.client.request_facts_by_grade(pcgs, grade)
+                print(coin_facts['ServerMessage'])
                 new_coin = Coin(coin_facts)
                 self.collection.add_coin(new_coin)
                 new_coin.to_widget(self.tree)

@@ -4,22 +4,33 @@ from dotenv import load_dotenv
 import sys
 import webbrowser
 import os
+import datetime
 
 app = QApplication()
 
-load_dotenv()
+path = os.path.realpath(".") + "\\src\\config\\"
+
 try:
-    os.getenv("PCGS_CERT")
-except KeyError:
-    open_browser = input("API Key was not detected.\nWould you like to visit the PCGS Public API webpage for extra instructions? (Y/n) ")
-    if open_browser.lower() == "y":
-        webbrowser.open("https://www.pcgs.com/publicapi/", 0)
-    api_key_input = input("After logging in, your API key can be found by clicking the link inside the \"Documentation\" area on the right.\nPlease paste your API key here: ")
-    path = os.path.realpath(".") + "\\src\\config\\"
+    if load_dotenv(path + ".env") is False:
+        print(".env did not load.")
+        raise Exception
+    if os.getenv('PCGS_CERT') is None:
+        print("Couldn't find PCGS cert.")
+        raise Exception
+except Exception:
+    # Display a dialog window to ask for user input.
+    from windows.KeyEnterWindow import *
+    window = KeyEnterWindow()
+    window.exec()
+
+    # Get the information from the window.
+    api_key = window.key_input.text()
+
+    # Write the key into the .env file.
     if os.path.exists(path) is False:
             os.mkdir(path)
     with open(path + ".env", "w") as file:
-        file.write("PCGS_CERT = \'" + api_key_input + "\'")
+        file.write("PCGS_CERT = \'" + api_key + "\'")
 
 from windows.MainWindow import Form
 

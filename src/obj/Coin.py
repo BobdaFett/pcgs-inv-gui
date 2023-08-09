@@ -18,6 +18,7 @@ class Coin:
         self.SeriesName         = obj['SeriesName']
         self.Category           = obj['Category']
         self.Designation        = obj['Designation']
+        self.CertNo             = obj['CertNo']
         self.Quantity           = quantity
         self.total_price        = quantity * self.PriceGuideValue
         self.paid_for           = 0
