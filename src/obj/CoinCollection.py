@@ -10,8 +10,7 @@ import os
 
 class CoinCollection:
     ''' A dictionary wrapper class. Keeps track of all the coins in a collection.
-        Coins are hashed into the dictionary using their PCGS number. As such,
-        the key to access them is that number.'''
+        Coins are hashed into the dictionary using their PCGS number. '''
     def __init__(self):
         # Initialize a list to hold all of the Coin objects
         self.collection: dict[str, Coin] = {}

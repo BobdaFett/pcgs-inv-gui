@@ -69,7 +69,7 @@ class Form(QDialog):
         self.collection.create_save_file()
 
     def new_click(self):
-        ''' Displays a modal window that requests the required info for a PCGS request. '''
+        ''' Displays a window that requests the required info for a PCGS API request. '''
         print("New clicked")
         window = RequestWindow("New Coin")
         window.exec()
@@ -124,7 +124,7 @@ class Form(QDialog):
             print("User denied the verification request.")
 
     def export_click(self):
-        ''' Will show a window that allows the user to export a CSV file to their PC. '''
+        ''' Displays a window that allows the user to export a CSV file to their PC. '''
         file_path = QFileDialog.getSaveFileName(self, 'Save As...', filter='Comma separated values (*.csv)')[0]  # must access the first index of a (str, str)
         if file_path != "":
             self.collection.dump_csv(file_path)

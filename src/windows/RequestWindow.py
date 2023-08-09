@@ -7,9 +7,7 @@ from PySide6.QtWidgets import QDialog, QLineEdit, QPushButton, QGridLayout
 from PySide6.QtGui import QIntValidator
 
 class RequestWindow(QDialog):
-    ''' A window that follows the general form for a PCGS API request.
-        NOTE: You must use the QDialog.exec() method to show this in order for the
-            QDialog.result() method to work. '''
+    ''' A window that follows the general form for a PCGS API request. '''
     def __init__(self, window_title: str, parent=None, pcgs="", grade=""):
         super(RequestWindow, self).__init__(parent)
         self.setWindowTitle(window_title)
