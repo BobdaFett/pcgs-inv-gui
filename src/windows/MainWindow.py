@@ -13,9 +13,9 @@ from .DeleteWindow import DeleteWindow
 from .RequestWindow import RequestWindow
 from .EditWindow import EditWindow
 from .ErrorWindow import ErrorWindow
-from requests import HTTPError
 
 import os
+import logging
 
 load_dotenv()
 PCGS_CERT = os.getenv("PCGS_CERT")
@@ -53,6 +53,11 @@ class Form(QDialog):
             # Initialize the QTreeWidget list.
             for coin in self.collection:
                 coin.to_widget(self.tree)
+            # Initialize the total price.
+            self.total = self.collection.total
+            self.total_label.setText("Total Value = $" + self.total.__str__())
+
+        # TODO How can we update the QTreeWidget when the user updates an existing coin?
 
         layout = QGridLayout()
         layout.addWidget(self.tree, 0, 0, 1, 5)
@@ -68,33 +73,33 @@ class Form(QDialog):
 
     def __del__(self):
         # Allow normal deletion, with the addition of a save pass.
+        logging.info("Shutting down, creating save.")
         self.collection.create_save_file()
 
     def new_click(self):
         ''' Displays a window that requests the required info for a PCGS API request. '''
-        print("New clicked")
         window = RequestWindow("New Coin")
         window.exec()
         # Check that the user accepted the dialog before taking any actions.
         if window.result() == 1:
             try:
-                print("User accepted dialog, making request.")
+                logging.info("User accepted dialog, making request.")
                 pcgs = int(window.pcgs_input.text())
                 grade = int(window.grade_input.text())
                 coin_facts = self.client.request_facts_by_grade(pcgs, grade)
-                print(coin_facts['ServerMessage'])
+                logging.info("Request successful, creating new coin.")
                 new_coin = Coin(coin_facts)
                 self.collection.add_coin(new_coin)
                 new_coin.to_widget(self.tree)
                 self.total += new_coin.PriceGuideValue
                 self.total_label.setText("Total Value = $" + self.total.__str__())
+                logging.info("Created coin with ID {0}.".format(new_coin.PCGSNo))
             except Exception as e:
                 # Log the error.
-                print("Error: {0}".format(e))
+                logging.warning("{0}".format(e))
                 # Display a dialog window to inform the user of the error.
                 window = ErrorWindow(e)
                 window.exec()
-                
 
     def edit_click(self):
         ''' Displays a window allowing the user to enter new information for the selected coin. '''
@@ -104,21 +109,24 @@ class Form(QDialog):
         window.exec()
         # Reinitialize the selected object. Simply take the (possibly) new values and change the QTreeWidgetItem.
         # This will run every time.
+        logging.info("User accepted dialog, updating coin.")
         sel_coin.PriceGuideValue = float(window.price.text())
         sel_coin.Quantity = int(window.quantity.text())
         sel_coin.paid_for = int(window.paid_for.text())
         sel_coin.notes = window.notes.toPlainText()
         sel_item.setText(7, "${0}".format(window.price.text()))
         sel_item.setText(9, window.quantity.text())
+        logging.info("Done.")
 
     def del_click(self):
         ''' Asks for confirmation that the user will delete a coin, then acts on that info. '''
         sel_item = self.tree.selectedItems()[0]
         sel_coin = self.collection[sel_item.text(8)]
         window = DeleteWindow(sel_coin.Name, self)
+        logging.info("Showing delete window.")
         window.exec()
         if window.result() == 1:
-            print("User accepted the verification request, deleting coin.")
+            logging.info("Deleting coin.")
             # Update the total price.
             self.total -= sel_coin.total_price
             self.total_label.setText("Total Value = $" + self.total.__str__())
@@ -126,13 +134,11 @@ class Form(QDialog):
             self.tree.invisibleRootItem().removeChild(sel_item)
             # Delete the item from the collection.
             del self.collection[sel_coin.PCGSNo]
-        else:
-            print("User denied the verification request.")
+            logging.info("Done.")
 
     def export_click(self):
         ''' Displays a window that allows the user to export a CSV file to their PC. '''
         file_path = QFileDialog.getSaveFileName(self, 'Save As...', filter='Comma separated values (*.csv)')[0]  # must access the first index of a (str, str)
         if file_path != "":
+            logging.info("User selected file path: {0}".format(file_path))
             self.collection.dump_csv(file_path)
-        else:
-            print("User denied the file selection dialog.")

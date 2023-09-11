@@ -14,6 +14,7 @@ class CoinCollection:
         Coins are hashed into the dictionary using their PCGS number. '''
     def __init__(self):
         # Initialize a list to hold all of the Coin objects
+        # self.collection = ["PCGSNo-Grade", Coin]
         self.collection: dict[str, Coin] = {}
         self.total = 0
 
@@ -76,12 +77,20 @@ class CoinCollection:
                 file.write(coin.serialize_csv())
             # Set up the footer.
             file.write(",,,,,,Total,${0},".format(self.total))
-        print("CSV created at " + file_path)
+        logging.debug("CSV created at " + file_path)
 
     def add_coin(self, coin: Coin):
-        ''' Adds a coin into the collection. '''
-        logging.info("Adding coin with number {0} to collection...".format(coin.PCGSNo))
-        self.collection[coin.PCGSNo] = coin
+        ''' Adds a coin into the collection. 
+            This must check if the coin already exists in the collection, and if it does,
+            it must update the quantity. '''
+        logging.info("Adding coin with ID {0} and grade {1} to collection.".format(coin.PCGSNo, coin.Grade))
+        key = coin.PCGSNo + "-" + coin.Grade
+        if self.collection.get(key) is None:
+            logging.debug("Coin does not exist in collection. Adding...")
+            self.collection[key] = coin
+        else:
+            logging.debug("Coin already exists in collection. Updating quantity...")
+            self.collection[key].Quantity += coin.Quantity
         self.total += coin.total_price * coin.Quantity
 
     def toJson(self):

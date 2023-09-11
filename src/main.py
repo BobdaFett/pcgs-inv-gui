@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 
 import sys
 import os
+import logging
 
 app = QApplication()
 
@@ -29,7 +30,13 @@ except Exception:
     with open(path + ".env", "w") as file:
         file.write("PCGS_CERT = \'" + api_key + "\'")
     subprocess.check_call(["attrib", "+H", path + ".env"])
-    
+
+# Set up the logger.
+logging.basicConfig(filename=path + "log.txt",
+                    level=logging.DEBUG,
+                    filemode="w",
+                    format="%(asctime)s - %(levelname)s - %(message)s",
+                    datefmt="%m/%d/%y %H:%M:%S %p")
 
 from windows.MainWindow import Form
 

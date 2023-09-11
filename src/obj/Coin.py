@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import QTreeWidget, QTreeWidgetItem
 
 import json
+import logging
 
 class Coin:
     def __init__(self, obj: dict, quantity=1):
@@ -30,7 +31,7 @@ class Coin:
             self.paid_for = obj['paid_for']
             self.notes = obj['notes']
         except Exception:
-            print("New coin created - no user data found. Continuing using defaults.")
+            logging.debug("New coin created - no user data found. Continuing using defaults.")
 
     def serialize_csv(self) -> str:
         ''' Serializes the object into a CSV format. '''
