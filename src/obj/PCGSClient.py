@@ -1,6 +1,13 @@
 import requests
 
 class PCGSClient:
+    class CoinNotFoundException(Exception):
+        """ Raised when the coin is not found in the PCGS database. """
+        pass
+    class PCGSApiException(Exception):
+        """ Raised when the PCGS API returns an unidentified error. """
+        pass
+
     ''' A client that handles all PCGS Public API requests. '''
     def __init__(self, api_key):
         self.API_URL = "https://api.pcgs.com/publicapi"
@@ -11,8 +18,15 @@ class PCGSClient:
         ''' Handles sending a request to the PCGS Public API. Returns a JSON deserialized value. '''
         request_url = self.API_URL + "/coindetail/GetCoinFactsByGrade/?PCGSNo={0}&GradeNo={1}&PlusGrade={2}".format(pcgs, grade, plus_grade)
         result = requests.get(request_url, headers={'authorization': 'bearer ' + self.API_KEY})
+        # Check the result for any errors.
         result.raise_for_status()
-        return result.json()
+        result_json = result.json()
+        if result_json["ServerMessage"] == "No data found":
+            raise PCGSClient.CoinNotFoundException("Coin not found with given PCGS number and grade.")
+        elif result_json["ServerMessage"] == "A server error occurred":
+            raise PCGSClient.PCGSApiException("An API error occurred.")
+        else:
+            return result_json
 
     def request_facts_by_barcode(self, barcode: int, service: str) -> dict:
         ''' Handles sending a request to the PCGS Public API. Returns a JSON deserialized value. 
@@ -28,3 +42,4 @@ class PCGSClient:
         result = requests.get(request_url, headers={'authorization': 'bearer ' + self.API_KEY})
         result.raise_for_status()
         return result.json()
+    

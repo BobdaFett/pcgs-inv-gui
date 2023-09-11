@@ -7,6 +7,7 @@ from .Coin import Coin
 
 import json
 import os
+import logging
 
 class CoinCollection:
     ''' A dictionary wrapper class. Keeps track of all the coins in a collection.
@@ -41,17 +42,20 @@ class CoinCollection:
             if working_directory == "":
                 working_directory = os.path.realpath(".")
             with open(working_directory + "\\src\\config\\" + file_name, "r") as file:
+                logging.info("Save file found. Reading...")
                 # Read the file.
                 json_obj = json.load(file)
                 for coin_dict in json_obj['collection'].values():
                     self.add_coin(Coin(coin_dict))
+                logging.info("Save file read successfully.")
                 return True
         except FileNotFoundError:
-            print("Save file does not exist. Continuing without any saved data... ")
+            logging.info("Save file does not exist. Continuing without saved data.")
             return False
 
     def create_save_file(self, working_directory="", file_name="collection.json"):
         ''' Creates a file that can be used in the read_file() method. '''
+        logging.info("Creating save file...")
         if working_directory == "":
             working_directory = os.path.realpath(".")
         path = working_directory + "\\src\\config\\"
@@ -59,9 +63,12 @@ class CoinCollection:
             os.mkdir(path)
         with open(working_directory + "\\src\\config\\" + file_name, "w") as file:
             file.write(self.toJson())
+        logging.info("Save file created successfully.")
 
     def dump_csv(self, file_path="collection.csv"):
+        ''' Dumps the collection into a CSV file. '''
         with open(file_path, "w") as file:
+            logging.info("Creating CSV file...")
             # Set up file headers.
             file.write("Series,Year,Mint,Denomination,Variety,Grade,Designation,Est. Price,PCGS #\n")
             # Serialize and write objects to the file.
@@ -73,8 +80,11 @@ class CoinCollection:
 
     def add_coin(self, coin: Coin):
         ''' Adds a coin into the collection. '''
+        logging.info("Adding coin with number {0} to collection...".format(coin.PCGSNo))
         self.collection[coin.PCGSNo] = coin
         self.total += coin.total_price * coin.Quantity
 
     def toJson(self):
+        ''' Serializes the collection into a JSON object. '''
+        logging.info("Serializing collection to JSON...")
         return json.dumps(self, indent=4, default=lambda o: o.__dict__)

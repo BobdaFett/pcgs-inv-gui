@@ -12,6 +12,8 @@ from obj.PCGSClient import PCGSClient
 from .DeleteWindow import DeleteWindow
 from .RequestWindow import RequestWindow
 from .EditWindow import EditWindow
+from .ErrorWindow import ErrorWindow
+from requests import HTTPError
 
 import os
 
@@ -86,9 +88,13 @@ class Form(QDialog):
                 new_coin.to_widget(self.tree)
                 self.total += new_coin.PriceGuideValue
                 self.total_label.setText("Total Value = $" + self.total.__str__())
-            except KeyError:
-                # TODO Make a nice error window for this, which will allow the user to try again.
-                print("Error: PCGS number does not match anything on record.")
+            except Exception as e:
+                # Log the error.
+                print("Error: {0}".format(e))
+                # Display a dialog window to inform the user of the error.
+                window = ErrorWindow(e)
+                window.exec()
+                
 
     def edit_click(self):
         ''' Displays a window allowing the user to enter new information for the selected coin. '''

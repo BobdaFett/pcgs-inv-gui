@@ -30,14 +30,16 @@ class Coin:
             self.paid_for = obj['paid_for']
             self.notes = obj['notes']
         except Exception:
-            print("Coin created based on an API request or keys not found. Continuing with passed values.")
+            print("New coin created - no user data found. Continuing using defaults.")
 
     def serialize_csv(self) -> str:
+        ''' Serializes the object into a CSV format. '''
         formatted_notes = self.notes.replace('\n', ' ')
         return "{0},{1},{2},{3},{4},{5},{6},{7},{8},{9}\n".format(self.SeriesName, self.Year, self.MintMark, self.Denomination, self.MajorVariety,
                                                               self.Grade, self.Designation, self.PriceGuideValue, self.PCGSNo, self.Quantity, formatted_notes)
 
     def to_widget(self, parent: QTreeWidget) -> QTreeWidgetItem:
+        ''' Creates a QTreeWidgetItem from the object. '''
         widget = QTreeWidgetItem(parent)
         widget.setText(0, self.SeriesName)
         widget.setText(1, self.Year.__str__())
@@ -53,5 +55,5 @@ class Coin:
         return widget
 
     def toJson(self):
-        # I'm not totally sure how this works, I just know that it does.
+        ''' Serializes the object into a JSON object. '''
         return json.dumps(self, indent=4, default=lambda o: o.__dict__)
