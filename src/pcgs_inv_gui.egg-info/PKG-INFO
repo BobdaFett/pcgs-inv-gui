@@ -21,7 +21,7 @@ I would have to release the entire application along with the API keys that prov
 Google. Therefore, it is not possible, however you're welcome to use your own PCGS Public API key.
 
 # Installation/Setup
-For the first time setup, run the command ```pip install``` from inside the pcgs-inv-gui folder. You will obviously need to have pip installed initially - if you don't think you have it or don't know, follow this link: https://pip.pypa.io/en/stable/installation/
+For the first time setup, run the command ```pip install .``` (notice the dot) from inside the pcgs-inv-gui folder. You will obviously need to have pip installed initially - if you don't think you have it or don't know, follow this link: https://pip.pypa.io/en/stable/installation/
 The program should be run from the ```main.py``` file in the ```src``` folder. This will check for your PCGS Public API key. If you do not have one, please go to https://api.pcgs.com/publicapi and sign up for one. The program will allow you to open a webpage directed there as well.
 Should you want to set up the file yourself, rather than have the program do it for you, you must create a ```.env``` file that has a ```"PCGS_CERT"``` variable. There's plenty of documentation on how to do this out on the internet, so I won't explain that here.
 

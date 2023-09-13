@@ -59,10 +59,10 @@ class CoinCollection:
         logging.info("Creating save file...")
         if working_directory == "":
             working_directory = os.path.realpath(".")
-        path = working_directory + "\\src\\config\\"
+        path = working_directory + "\\config\\"
         if os.path.exists(path) is False:
             os.mkdir(path)
-        with open(working_directory + "\\src\\config\\" + file_name, "w") as file:
+        with open(path + file_name, "w") as file:
             file.write(self.toJson())
         logging.info("Save file created successfully.")
 

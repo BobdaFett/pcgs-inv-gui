@@ -1,5 +1,6 @@
 if __name__ == "__main__":
     import sys
+
     print("Please run the program from the main.py file.")
     sys.exit()
 
@@ -19,6 +20,7 @@ import logging
 
 load_dotenv()
 PCGS_CERT = os.getenv("PCGS_CERT")
+
 
 class Form(QDialog):
     def __init__(self, parent=None):
@@ -41,7 +43,9 @@ class Form(QDialog):
         self.export_button.clicked.connect(self.export_click)
 
         self.tree = QTreeWidget()
-        self.tree.setHeaderLabels(["Series", "Year", "Mint", "Denomination", "Variety", "Grade", "Designation", "Est. Price", "PCGS #", "Quantity"])
+        self.tree.setHeaderLabels(
+            ["Series", "Year", "Mint", "Denomination", "Variety", "Grade", "Designation", "Est. Price", "PCGS #",
+             "Quantity"])
         self.tree.setColumnWidth(0, 300)
         self.tree.setColumnWidth(4, 175)
         self.tree.setColumnWidth(8, 75)
@@ -77,7 +81,7 @@ class Form(QDialog):
         self.collection.create_save_file()
 
     def new_click(self):
-        ''' Displays a window that requests the required info for a PCGS API request. '''
+        """ Displays a window that requests the required info for a PCGS API request. """
         window = RequestWindow("New Coin")
         window.exec()
         # Check that the user accepted the dialog before taking any actions.
@@ -102,8 +106,8 @@ class Form(QDialog):
                 window.exec()
 
     def edit_click(self):
-        ''' Displays a window allowing the user to enter new information for the selected coin. '''
-        sel_item = self.tree.selectedItems()[0]  # Gets the selected QTreeWidgetItem. There can only ever be one selected.
+        """ Displays a window allowing the user to enter new information for the selected coin. """
+        sel_item = self.tree.selectedItems()[0]  # Gets the selected QTreeWidgetItem.
         sel_coin = self.collection[sel_item.text(8)]  # Gets the selected coin. This feels overcomplicated.
         window = EditWindow(sel_coin, self)
         window.exec()
@@ -119,7 +123,7 @@ class Form(QDialog):
         logging.info("Done.")
 
     def del_click(self):
-        ''' Asks for confirmation that the user will delete a coin, then acts on that info. '''
+        """ Asks for confirmation that the user will delete a coin, then acts on that info. """
         sel_item = self.tree.selectedItems()[0]
         sel_coin = self.collection[sel_item.text(8)]
         window = DeleteWindow(sel_coin.Name, self)
@@ -137,8 +141,9 @@ class Form(QDialog):
             logging.info("Done.")
 
     def export_click(self):
-        ''' Displays a window that allows the user to export a CSV file to their PC. '''
-        file_path = QFileDialog.getSaveFileName(self, 'Save As...', filter='Comma separated values (*.csv)')[0]  # must access the first index of a (str, str)
+        """ Displays a window that allows the user to export a CSV file to their PC. """
+        file_path = QFileDialog.getSaveFileName(self, 'Save As...', filter='Comma separated values (*.csv)')[
+            0]  # must access the first index of a (str, str)
         if file_path != "":
             logging.info("User selected file path: {0}".format(file_path))
             self.collection.dump_csv(file_path)

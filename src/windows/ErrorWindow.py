@@ -1,10 +1,12 @@
 if __name__ == "__main__":
     import sys
+
     print("Please run the program from the main.py file.")
     sys.exit()
 
 from PySide6.QtWidgets import QDialog, QPushButton, QGridLayout, QLabel
 from requests import HTTPError
+
 
 class ErrorWindow(QDialog):
     def __init__(self, e, parent=None):
@@ -20,7 +22,7 @@ class ErrorWindow(QDialog):
         self.error_label = QLabel(self.error.__str__())
         self.close_button = QPushButton("Close")
         self.close_button.clicked.connect(self.close)
-        
+
         # Set up the layout.
         layout = QGridLayout()
         layout.addWidget(self.error_label, 0, 0)
