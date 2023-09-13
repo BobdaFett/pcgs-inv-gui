@@ -14,6 +14,7 @@ from .DeleteWindow import DeleteWindow
 from .RequestWindow import RequestWindow
 from .EditWindow import EditWindow
 from .ErrorWindow import ErrorWindow
+from requests import HTTPError
 
 import os
 import logging
@@ -27,7 +28,10 @@ class Form(QDialog):
         super(Form, self).__init__(parent)
         self.setWindowTitle("Testing")
 
-        self.client = PCGSClient(PCGS_CERT)
+        try:
+            self.client = PCGSClient(PCGS_CERT)
+        except HTTPError as e:
+            error_window = ErrorWindow(e)
         self.collection = CoinCollection()
 
         self.new_button = QPushButton("New...")

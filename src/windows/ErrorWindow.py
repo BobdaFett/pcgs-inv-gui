@@ -1,3 +1,5 @@
+import logging
+
 if __name__ == "__main__":
     import sys
 
@@ -17,6 +19,17 @@ class ErrorWindow(QDialog):
         # Match and simplify the HTTPError.
         if isinstance(self.error, HTTPError):
             self.error = "HTTP error: {0} - {1}".format(self.error.response.status_code, self.error.response.reason)
+            if self.error.response.status_code == 401:
+                import sys
+                import os
+                logging.critical("API key is invalid. Deleting .env file for reconfig upon restart...")
+                path = os.path.realpath(".")
+                if os.path.exists(path + "\\config\\.env"):
+                    os.remove(path + "\\config\\.env")
+                    logging.debug(".env file deleted successfully. Shutting down...")
+                else:
+                    logging.error(".env file does not exist. Shutting down...")
+                sys.exit(401)
 
         # Display the error in a QLabel.
         self.error_label = QLabel(self.error.__str__())

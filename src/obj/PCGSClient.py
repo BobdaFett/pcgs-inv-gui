@@ -11,15 +11,12 @@ class PCGSClient:
         """ Raised when the PCGS API returns an unidentified error. """
         pass
 
-    class APIKeyInvalidException(Exception):
-        """ Raised when the PCGS API returns a code 401 (unauthorized) """
-        pass
-
     def __init__(self, api_key):
         self.API_URL = "https://api.pcgs.com/publicapi"
         self.API_KEY = api_key
         logging.debug("PCGSClient initialized.")
         # TODO Find out if there's a way to test the api before using it. Allows raising errors.
+        self.test_key()
 
     def request_facts_by_grade(self, pcgs: int, grade: int, plus_grade: bool = False) -> dict:
         ''' Handles sending a request to the PCGS Public API. Returns a JSON deserialized value. '''
